@@ -4,6 +4,7 @@ import { ShoppingCart, Heart, User, Menu, Shield, PawPrint, CalendarCheck, Bell,
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query';
 import useAuthStore from '../../store/useAuthStore';
 import useCartStore from '../../store/useCartStore';
+import useWishlistStore from '../../store/useWishlistStore';
 import SearchSuggestions from '../common/SearchSuggestions';
 import { notificationService } from '../../api/notificationService';
 import logo from '../../../Images/headerandfooter/Logo.png';
@@ -41,7 +42,8 @@ export default function Header() {
   }, [location.pathname]);
 
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { cartCount, resetCart } = useCartStore();
+  const { cartCount, resetCart, openCartDrawer } = useCartStore();
+  const { openWishlistDrawer } = useWishlistStore();
 
   // Notification queries (only when authenticated)
   const { data: unreadData } = useQuery({
@@ -174,19 +176,19 @@ export default function Header() {
 
               {/* Wishlist - Now visible on Mobile Portrait */}
               {isAuthenticated && (
-                <Link to="/wishlist" className="relative text-gray-700 hover:text-primary-600 transition-colors block" title="Danh sách yêu thích">
+                <button onClick={openWishlistDrawer} className="relative text-gray-700 hover:text-primary-600 transition-colors block" title="Danh sách yêu thích">
                   <Heart size={20} className="sm:w-7 sm:h-7" />
-                </Link>
+                </button>
               )}
               {/* Cart */}
-              <Link to="/cart" className="relative text-gray-700 hover:text-primary-600 transition-colors" title="Giỏ hàng">
+              <button onClick={openCartDrawer} className="relative text-gray-700 hover:text-primary-600 transition-colors" title="Giỏ hàng">
                 <ShoppingCart size={20} className="sm:w-7 sm:h-7" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 bg-primary-600 text-white text-[8px] sm:text-[10px] font-black rounded-full h-4 w-4 sm:h-6 sm:w-6 flex items-center justify-center border-2 border-white shadow-sm">
                     {cartCount}
                   </span>
                 )}
-              </Link>
+              </button>
               {/* User Menu - Visible on all screens to fill the header */}
               {isAuthenticated ? (
                 <div className="relative group block">

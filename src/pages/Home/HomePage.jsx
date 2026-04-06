@@ -5,7 +5,7 @@ import { ShoppingCart, Star, ArrowRight, Truck, Shield, RotateCcw, Headphones, P
 import { productService } from '../../api/productService';
 import { formatPrice } from '../../utils/formatters';
 import { cartService } from '../../api/cartService';
-import useCartStore from '../../store/useCartStore';
+import useCartStore, { getCartTotalQuantity } from '../../store/useCartStore';
 import useAuthStore from '../../store/useAuthStore';
 import toast from 'react-hot-toast';
 
@@ -41,7 +41,6 @@ const CATEGORY_STYLES = {
 
 export default function HomePage() {
   const queryClient = useQueryClient();
-  const { incrementCart } = useCartStore();
   const { isAuthenticated } = useAuthStore();
   const [addingIds, setAddingIds] = useState(new Set());
   const [activeTab, setActiveTab] = useState('best'); // 'best' or 'latest'
@@ -166,7 +165,7 @@ export default function HomePage() {
     applyMomentum();
   };
 
-  const onMouseUp = (e) => {
+  const onMouseUp = () => {
     if (!dragRef.isDown) return;
     dragRef.isDown = false;
     categoryScrollRef.current.style.cursor = 'grab';
@@ -212,9 +211,10 @@ export default function HomePage() {
       await cartService.addToCart(productId, 1);
       const cart = await cartService.getCart();
       const { setCartCount } = useCartStore.getState();
-      setCartCount(cart?.items?.length || 0);
+      setCartCount(getCartTotalQuantity(cart));
       queryClient.invalidateQueries(['cart']);
       toast.success('Đã thêm vào giỏ hàng!');
+      useCartStore.getState().openCartDrawer();
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Không thể thêm vào giỏ hàng');
     } finally {
@@ -223,7 +223,7 @@ export default function HomePage() {
   }, [addingIds, isAuthenticated, queryClient]);
 
   const products = featuredProducts || [];
-  const latest = latestProducts?.content || [];
+  const _latest = latestProducts?.content || [];
 
   return (
     <div className="bg-white min-h-screen">
@@ -674,8 +674,8 @@ function ProductCard({ product, onAddToCart, isAdding = false }) {
         <img
           src={product.thumbnailUrl || (product.images?.[0]?.url ?
             (product.images[0].url.startsWith('http') ?
-              `http://localhost:8080${new URL(product.images[0].url).pathname}` :
-              `http://localhost:8080${product.images[0].url.startsWith('/') ? '' : '/'}${product.images[0].url}`) :
+              product.images[0].url :
+              `${product.images[0].url.startsWith('/') ? '' : '/'}${product.images[0].url}`) :
             hero)}
           alt={product.tenProduct}
           onError={(e) => { e.target.src = hero; }}

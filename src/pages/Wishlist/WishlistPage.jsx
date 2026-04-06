@@ -21,7 +21,7 @@ import { productService } from '../../api/productService';
 import { formatPrice } from '../../utils/formatters';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
-import useCartStore from '../../store/useCartStore';
+import useCartStore, { getCartTotalQuantity } from '../../store/useCartStore';
 
 export default function WishlistPage() {
   const queryClient = useQueryClient();
@@ -47,9 +47,10 @@ export default function WishlistPage() {
       await cartService.addToCart(productId, 1);
       const cart = await cartService.getCart();
       const { setCartCount } = useCartStore.getState();
-      setCartCount(cart?.items?.length || 0);
+      setCartCount(getCartTotalQuantity(cart));
       queryClient.invalidateQueries(['cart']);
       toast.success('Đã thêm vào giỏ hàng!');
+      useCartStore.getState().openCartDrawer();
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Không thể thêm vào giỏ hàng');
     } finally {
@@ -75,9 +76,10 @@ export default function WishlistPage() {
     onSuccess: async () => {
       const cart = await cartService.getCart();
       const { setCartCount } = useCartStore.getState();
-      setCartCount(cart?.items?.length || 0);
+      setCartCount(getCartTotalQuantity(cart));
       queryClient.invalidateQueries(['cart']);
       toast.success('Đã thêm vào giỏ hàng!');
+      useCartStore.getState().openCartDrawer();
     },
     onError: () => {
       toast.error('Không thể thêm vào giỏ hàng');
@@ -290,7 +292,7 @@ export default function WishlistPage() {
                     <button
                       onClick={() => handleAddToCartFromWishlist(item.productId, item.wishlistId)}
                       disabled={item.inStock === false || addToCartFromWishlistMutation.isPending}
-                      aria-label="Chọn quà và thêm vào giỏ hàng"
+                      aria-label="Thêm vào giỏ"
                       className="w-full py-5 bg-gray-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:bg-orange-600 hover:-translate-y-1 transition-all active:scale-[0.98] disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-3 group/btn relative overflow-hidden focus-visible:ring-2 focus-visible:ring-orange-500 outline-none"
                     >
                       <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000 -skew-x-12" />
@@ -299,7 +301,7 @@ export default function WishlistPage() {
                       ) : (
                         <>
                           <ShoppingCart size={18} />
-                          <span>CHỐN QUÀ NGAY</span>
+                          <span>THÊM VÀO GIỎ</span>
                         </>
                       )}
                     </button>
@@ -316,7 +318,6 @@ export default function WishlistPage() {
 
 function CardProduct({ product, onAddToCart, isAdding = false }) {
   const rating = product.avgRating || 0;
-  const soldCount = product.soLuongDaBan || 0;
 
   return (
     <div className="bg-white rounded-3xl md:rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 group relative flex flex-col h-full focus-within:ring-2 focus-within:ring-orange-500 outline-none">
