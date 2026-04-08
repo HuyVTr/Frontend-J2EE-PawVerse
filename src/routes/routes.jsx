@@ -38,6 +38,13 @@ const BookingDetailPage = lazy(() => import('../pages/Staff/BookingDetailPage'))
 const ActivityLogPage = lazy(() => import('../pages/Admin/ActivityLogPage'));
 const VoucherManagementPage = lazy(() => import('../pages/Staff/VoucherManagementPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFound/NotFoundPage'));
+const AboutPage = lazy(() => import('../pages/Info/AboutPage'));
+const ContactPage = lazy(() => import('../pages/Info/ContactPage'));
+const ShippingPage = lazy(() => import('../pages/Info/ShippingPage'));
+const ReturnsPage = lazy(() => import('../pages/Info/ReturnsPage'));
+const PrivacyPage = lazy(() => import('../pages/Info/PrivacyPage'));
+const TermsPage = lazy(() => import('../pages/Info/TermsPage'));
+const CookiesPage = lazy(() => import('../pages/Info/CookiesPage'));
 
 // Suspense wrapper with loading fallback
 function SL({ children }) {
@@ -75,6 +82,13 @@ const router = createBrowserRouter([
       { path: 'wishlist', element: <SL><WishlistPage /></SL> },
       { path: 'bookings', element: <SL><BookingHistoryPage /></SL> },
       { path: 'my-pets', element: <SL><PetProfilePage /></SL> },
+      { path: 'about', element: <SL><AboutPage /></SL> },
+      { path: 'contact', element: <SL><ContactPage /></SL> },
+      { path: 'shipping', element: <SL><ShippingPage /></SL> },
+      { path: 'returns', element: <SL><ReturnsPage /></SL> },
+      { path: 'privacy', element: <SL><PrivacyPage /></SL> },
+      { path: 'terms', element: <SL><TermsPage /></SL> },
+      { path: 'cookies', element: <SL><CookiesPage /></SL> },
     ],
   },
   {

@@ -55,7 +55,8 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-400 uppercase mb-1">Địa chỉ</p>
-                  <p className="text-gray-900 font-medium">Số 1, Võ Văn Ngân, Thủ Đức, TP.HCM</p>
+                  <p className="text-gray-900 font-medium">Phân khu đào tạo E1, Khu Công nghệ cao TP.HCM</p>
+                  <p className="text-gray-900 font-medium">Phường Hiệp Phú, TP. Thủ Đức, TP.HCM</p>
                 </div>
               </div>
               <div className="flex gap-4 group w-full max-w-sm">
@@ -64,7 +65,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-400 uppercase mb-1">Hotline</p>
-                  <p className="text-gray-900 font-black text-xl">1900 8888</p>
+                  <p className="text-gray-900 font-black text-xl">1900 xxxx</p>
                 </div>
               </div>
               <div className="flex gap-4 group w-full max-w-sm">
@@ -73,7 +74,7 @@ export default function Footer() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-400 uppercase mb-1">Email</p>
-                  <p className="text-gray-900 font-medium">hello@pawverse.com</p>
+                  <p className="text-gray-900 font-medium">farolnguyen824@gmail.com</p>
                 </div>
               </div>
             </div>
