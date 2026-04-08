@@ -28,6 +28,7 @@ export default function ProductsPage() {
   const sortDirection = searchParams.get('sortDirection') || 'DESC';
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
+  const minRating = searchParams.get('minRating') || '';
 
   // Sync local price state with URL params on mount/change
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function ProductsPage() {
 
   // Fetch products
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ['products', page, categoryId, brandId, keyword, sortBy, sortDirection, minPrice, maxPrice],
+    queryKey: ['products', page, categoryId, brandId, keyword, sortBy, sortDirection, minPrice, maxPrice, minRating],
     queryFn: () => productService.getProducts({
       page: page - 1,
       size: 12,
@@ -48,6 +49,7 @@ export default function ProductsPage() {
       sortDirection,
       minPrice,
       maxPrice,
+      minRating,
     }),
   });
 
@@ -282,16 +284,30 @@ export default function ProductsPage() {
             <div>
               <h4 className="font-black text-sm text-gray-400 uppercase tracking-widest mb-4">Đánh giá</h4>
               <div className="space-y-2">
-                {[5, 4, 3, 2, 1].map((stars) => (
-                  <button key={stars} className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary-600 transition-colors py-1 group w-full">
-                    <div className="flex gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={14} className={i < stars ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'} />
-                      ))}
-                    </div>
-                    <span className="font-medium group-hover:translate-x-1 transition-transform">{stars === 5 ? '' : 'trở lên'}</span>
-                  </button>
-                ))}
+                {[5, 4, 3, 2, 1].map((stars) => {
+                  const isActive = minRating === String(stars);
+                  return (
+                    <button
+                      key={stars}
+                      onClick={() => handleFilterChange('minRating', isActive ? '' : String(stars))}
+                      className={`flex items-center gap-2 text-sm transition-colors py-1 group w-full rounded-lg px-2 ${
+                        isActive
+                          ? 'bg-amber-50 text-amber-600 font-bold'
+                          : 'text-gray-600 hover:text-amber-600'
+                      }`}
+                    >
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} size={14} className={i < stars ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'} />
+                        ))}
+                      </div>
+                      <span className={`font-medium transition-transform ${isActive ? '' : 'group-hover:translate-x-1'}`}>
+                        {stars === 5 ? '' : 'trở lên'}
+                      </span>
+                      {isActive && <span className="ml-auto text-xs text-amber-400">✕</span>}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
