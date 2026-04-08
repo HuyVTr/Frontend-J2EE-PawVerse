@@ -145,14 +145,38 @@ export default function ProductManagementPage() {
 
   const toggleEnabledMutation = useMutation({
     mutationFn: ({ id, isEnabled }) => adminService.toggleProductEnabled(id, isEnabled),
-    onSuccess: () => queryClient.invalidateQueries(['admin-products']),
-    onError: () => toast.error('Không thể thay đổi trạng thái'),
+    onMutate: async ({ id, isEnabled }) => {
+      await queryClient.cancelQueries({ queryKey: ['admin-products'] });
+      const previousData = queryClient.getQueryData(['admin-products', currentPage, searchTerm, statusFilter]);
+      queryClient.setQueryData(['admin-products', currentPage, searchTerm, statusFilter], (old) => {
+        if (!old) return old;
+        return { ...old, content: old.content.map((p) => p.idProduct === id ? { ...p, isEnabled } : p) };
+      });
+      return { previousData };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previousData) queryClient.setQueryData(['admin-products', currentPage, searchTerm, statusFilter], ctx.previousData);
+      toast.error('Không thể thay đổi trạng thái');
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin-products'] }),
   });
 
   const toggleFeaturedMutation = useMutation({
     mutationFn: ({ id, isFeatured }) => adminService.toggleProductFeatured(id, isFeatured),
-    onSuccess: () => queryClient.invalidateQueries(['admin-products']),
-    onError: () => toast.error('Không thể thay đổi trạng thái nổi bật'),
+    onMutate: async ({ id, isFeatured }) => {
+      await queryClient.cancelQueries({ queryKey: ['admin-products'] });
+      const previousData = queryClient.getQueryData(['admin-products', currentPage, searchTerm, statusFilter]);
+      queryClient.setQueryData(['admin-products', currentPage, searchTerm, statusFilter], (old) => {
+        if (!old) return old;
+        return { ...old, content: old.content.map((p) => p.idProduct === id ? { ...p, isFeatured } : p) };
+      });
+      return { previousData };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previousData) queryClient.setQueryData(['admin-products', currentPage, searchTerm, statusFilter], ctx.previousData);
+      toast.error('Không thể thay đổi trạng thái nổi bật');
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['admin-products'] }),
   });
 
   const openAddModal = () => {
