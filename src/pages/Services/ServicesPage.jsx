@@ -152,12 +152,22 @@ function BookingModal({ isOpen, onClose, initialService }) {
     },
   });
 
+  const getMinDateTime = () => {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  };
+
   const handleSubmit = () => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
     setError('');
+    if (form.ngayGioDat && new Date(form.ngayGioDat) < new Date()) {
+      setError('Ngày giờ hẹn phải là thời điểm trong tương lai');
+      return;
+    }
     const payload = {
       hoTen: form.hoTen,
       soDienThoai: form.soDienThoai,
@@ -349,7 +359,7 @@ function BookingModal({ isOpen, onClose, initialService }) {
                        <input
                          type="datetime-local"
                          value={form.ngayGioDat}
-                         min={new Date().toISOString().slice(0, 16)}
+                         min={getMinDateTime()}
                          onChange={(e) => setForm({ ...form, ngayGioDat: e.target.value })}
                          className="w-full px-8 py-4 bg-gray-50/50 border-2 border-transparent focus:border-orange-200 focus:bg-white focus:outline-none transition-all duration-300 rounded-2xl font-bold text-gray-900 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
                        />
