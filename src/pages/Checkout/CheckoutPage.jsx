@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -38,6 +38,7 @@ import { getProvinces, getDistricts, getWards, findProvinceCode, findDistrictCod
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
 import useAuthStore from '../../store/useAuthStore';
+import useCartStore from '../../store/useCartStore';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -571,9 +572,15 @@ export default function CheckoutPage() {
   };
 
   // Create order mutation
+  const queryClient = useQueryClient();
+  const resetCart = useCartStore((s) => s.resetCart);
+
   const createOrderMutation = useMutation({
     mutationFn: (orderData) => orderService.createOrder(orderData),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      try { await cartService.clearCart(); } catch (_) {}
+      resetCart();
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
       toast.success('Đặt hàng thành công!');
       navigate(`/orders/${data.orderId}`);
     },
