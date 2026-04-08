@@ -129,7 +129,10 @@ export default function PetProfilePage() {
       if (selectedPet && avatarUrl) setSelectedPet({ ...selectedPet, anhPet: avatarUrl });
       toast.success('Boss trông thật bảnh! 📸');
     },
-    onError: () => toast.error('Upload ảnh thất bại rồi!'),
+    onError: (err) => {
+      if (err.response?.status === 413) toast.error('Ảnh quá lớn, Boss không load nổi! (Tối đa 5MB)');
+      else toast.error(err.response?.data?.message || 'Upload ảnh thất bại rồi!');
+    },
   });
 
   const handleDeleteClick = (petId) => {

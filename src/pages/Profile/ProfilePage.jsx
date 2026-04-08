@@ -76,8 +76,9 @@ export default function ProfilePage() {
       setAvatarPreview(null);
       toast.success('Cập nhật ảnh đại diện thành công!');
     },
-    onError: () => {
-      toast.error('Upload ảnh thất bại');
+    onError: (err) => {
+      if (err.response?.status === 413) toast.error('Ảnh quá lớn (tối đa 5MB)');
+      else toast.error(err.response?.data?.message || 'Upload ảnh thất bại');
     },
   });
 
