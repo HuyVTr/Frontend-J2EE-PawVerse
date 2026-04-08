@@ -28,9 +28,9 @@ export default function Footer() {
             <h4 className="text-xl font-black text-gray-900 mb-8 uppercase tracking-widest text-sm">Cửa hàng</h4>
             <ul className="space-y-4">
               <FooterLink to="/products">Tất cả sản phẩm</FooterLink>
-              <FooterLink to="/products?category=1">Thức ăn</FooterLink>
-              <FooterLink to="/products?category=2">Phụ kiện</FooterLink>
-              <FooterLink to="/products?category=3">Đồ chơi</FooterLink>
+              <FooterLink to="/products?categoryId=2">Thức ăn</FooterLink>
+              <FooterLink to="/products?categoryId=7">Phụ kiện</FooterLink>
+              <FooterLink to="/products?categoryId=5">Đồ chơi</FooterLink>
             </ul>
           </div>
 
