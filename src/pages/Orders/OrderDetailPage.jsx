@@ -5,7 +5,7 @@ import {
   ArrowLeft, Package, MapPin, CreditCard, Clock, CheckCircle, XCircle, 
   Truck, ArrowRight, Ban, ShieldCheck, Download, Star, Bone, PawPrint, 
   ChevronRight, Hash, ReceiptText, User, Zap, AlertTriangle, X, MessageSquare,
-  ImagePlus, Film, Trash2, Smile
+  Smile
 } from 'lucide-react';
 import { orderService } from '../../api/orderService';
 import { adminService } from '../../api/adminService';
@@ -175,9 +175,6 @@ function ReviewModal({ isOpen, onClose, onSubmit, productName, isPending }) {
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
-  const [mediaFiles, setMediaFiles] = useState([]);
-  const [mediaPreviews, setMediaPreviews] = useState([]);
-  const [uploading, setUploading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const textareaRef = useRef(null);
 
@@ -208,65 +205,12 @@ function ReviewModal({ isOpen, onClose, onSubmit, productName, isPending }) {
 
   if (!isOpen) return null;
 
-  const handleAddFiles = (e) => {
-    const files = Array.from(e.target.files);
-    if (mediaFiles.length + files.length > 5) {
-      toast.error('Tối đa 5 file ảnh/video');
+  const handleSubmit = () => {
+    if (comment.trim().length < 10) {
+      toast.error('Nội dung đánh giá phải có ít nhất 10 ký tự');
       return;
     }
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'];
-    const validFiles = files.filter(f => {
-      if (!allowedTypes.includes(f.type)) {
-        toast.error(`${f.name}: Định dạng không hợp lệ`);
-        return false;
-      }
-      const isVideo = f.type.startsWith('video/');
-      const maxSize = isVideo ? 30 * 1024 * 1024 : 5 * 1024 * 1024;
-      if (f.size > maxSize) {
-        toast.error(`${f.name}: Vượt quá ${isVideo ? '30MB' : '5MB'}`);
-        return false;
-      }
-      return true;
-    });
-
-    const newFiles = [...mediaFiles, ...validFiles];
-    setMediaFiles(newFiles);
-
-    const newPreviews = validFiles.map(f => ({
-      url: URL.createObjectURL(f),
-      type: f.type.startsWith('video/') ? 'video' : 'image',
-      name: f.name,
-    }));
-    setMediaPreviews(prev => [...prev, ...newPreviews]);
-    e.target.value = '';
-  };
-
-  const removeFile = (index) => {
-    URL.revokeObjectURL(mediaPreviews[index].url);
-    setMediaFiles(prev => prev.filter((_, i) => i !== index));
-    setMediaPreviews(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async () => {
-    if (!comment.trim()) {
-      toast.error('Vui lòng nhập nội dung đánh giá');
-      return;
-    }
-
-    let mediaUrls = [];
-    if (mediaFiles.length > 0) {
-      setUploading(true);
-      try {
-        mediaUrls = await productService.uploadReviewMedia(mediaFiles);
-      } catch (err) {
-        toast.error(err?.response?.data?.message || 'Upload ảnh/video thất bại');
-        setUploading(false);
-        return;
-      }
-      setUploading(false);
-    }
-
-    onSubmit({ rating, comment, mediaUrls });
+    onSubmit({ rating, comment });
   };
 
   return (
@@ -356,44 +300,12 @@ function ReviewModal({ isOpen, onClose, onSubmit, productName, isPending }) {
               maxLength={5000}
               className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50/50 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-300 resize-none transition-all"
             />
-            <p className="text-right text-[10px] font-bold text-gray-300 mt-1">{comment.length}/5000</p>
-          </div>
-
-          <div className="mb-6">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3">ẢNH / VIDEO <span className="text-gray-300">(không bắt buộc, tối đa 5)</span></p>
-            
-            <div className="flex flex-wrap gap-3">
-              {mediaPreviews.map((preview, idx) => (
-                <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-100 group">
-                  {preview.type === 'video' ? (
-                    <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                      <Film size={24} className="text-white" />
-                    </div>
-                  ) : (
-                    <img src={preview.url} alt="" className="w-full h-full object-cover" />
-                  )}
-                  <button
-                    onClick={() => removeFile(idx)}
-                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 size={10} className="text-white" />
-                  </button>
-                </div>
-              ))}
-
-              {mediaFiles.length < 5 && (
-                <label className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:border-amber-300 hover:bg-amber-50/50 transition-all">
-                  <ImagePlus size={20} className="text-gray-300" />
-                  <span className="text-[8px] font-bold text-gray-300 mt-1">THÊM</span>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
-                    onChange={handleAddFiles}
-                    className="hidden"
-                  />
-                </label>
-              )}
+            <div className="flex justify-between mt-1">
+              {comment.trim().length < 10 && comment.trim().length > 0
+                ? <p className="text-[10px] font-bold text-amber-500">Cần thêm {10 - comment.trim().length} ký tự nữa</p>
+                : <span />
+              }
+              <p className="text-[10px] font-bold text-gray-300">{comment.length}/5000</p>
             </div>
           </div>
 
@@ -406,10 +318,10 @@ function ReviewModal({ isOpen, onClose, onSubmit, productName, isPending }) {
             </button>
             <button
               onClick={handleSubmit}
-              disabled={isPending || uploading || !comment.trim()}
+              disabled={isPending || comment.trim().length < 10}
               className="py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white bg-amber-500 shadow-xl shadow-amber-200 hover:bg-amber-600 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {uploading ? 'ĐANG TẢI...' : isPending ? 'ĐANG GỬI...' : 'GỬI ĐÁNH GIÁ'}
+              {isPending ? 'ĐANG GỬI...' : 'GỬI ĐÁNH GIÁ'}
             </button>
           </div>
         </div>
@@ -571,7 +483,7 @@ export default function OrderDetailPage() {
       <ReviewModal
         isOpen={reviewModal.isOpen}
         onClose={() => setReviewModal({ isOpen: false, productId: null, productName: '' })}
-        onSubmit={({ rating, comment, mediaUrls }) => reviewMutation.mutate({ productId: reviewModal.productId, rating, comment, mediaUrls })}
+        onSubmit={({ rating, comment }) => reviewMutation.mutate({ productId: reviewModal.productId, rating, comment })}
         productName={reviewModal.productName}
         isPending={reviewMutation.isPending}
       />
